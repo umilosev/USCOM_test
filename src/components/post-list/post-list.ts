@@ -26,6 +26,7 @@ export class PostList implements OnInit {
     this.posts$ = this.postService.getPosts();
   }
 
+  // Initialize the component and the data source for the table
   ngOnInit() {
     this.posts$.subscribe(posts => {
       this.dataSource.data = posts;
@@ -35,6 +36,7 @@ export class PostList implements OnInit {
     });
   }
 
+  //routes to post page that we clicked
   onRowClick(post: Post) {
     console.log('Clicked post:', post);
     this.postService.setSelectedPost(post);
