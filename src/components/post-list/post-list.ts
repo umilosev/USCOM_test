@@ -37,7 +37,7 @@ export class PostList implements OnInit {
 
   onRowClick(post: Post) {
     console.log('Clicked post:', post);
-    // TODO click logic navigation to specific post and display its page
+    this.postService.setSelectedPost(post);
     this.router.navigate([`/posts/${post.id}`]);
   }
 }

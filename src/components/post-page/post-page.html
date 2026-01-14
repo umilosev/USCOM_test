@@ -1,1 +1,7 @@
-<p>post-page works!</p>
+<div *ngIf="post">
+  <h1>{{ post.title }}</h1>
+  <p>{{ post.body }}</p>
+</div>
+<div *ngIf="!post">
+  <p>No post selected.</p>
+</div>

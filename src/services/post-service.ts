@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, from } from 'rxjs';
+import { Observable, from, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Post } from '../models/post';
 
@@ -8,6 +8,9 @@ import { Post } from '../models/post';
 })
 export class PostService {
   apiPostsUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+  private selectedPostSubject = new BehaviorSubject<Post | null>(null);
+  selectedPost$ = this.selectedPostSubject.asObservable();
 
   getPosts(): Observable<Post[]> {
     return from(
@@ -23,6 +26,14 @@ export class PostService {
         throw error; // Re-throw to let subscribers handle
       })
     );
+  }
+
+  setSelectedPost(post: Post) {
+    this.selectedPostSubject.next(post);
+  }
+
+  getSelectedPost(): Post | null {
+    return this.selectedPostSubject.value;
   }
 
   getPostComments(postId: number): Observable<any[]> {
