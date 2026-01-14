@@ -6,6 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Post } from '../../models/post';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-post-list',
@@ -14,6 +15,7 @@ import { Post } from '../../models/post';
   styleUrl: './post-list.css',
 })
 export class PostList implements OnInit {
+
   dataSource = new MatTableDataSource<Post>([]);
   displayedColumns: string[] = ['id', 'title', 'body'];
   posts$: Observable<Post[]>;
@@ -33,4 +35,8 @@ export class PostList implements OnInit {
     });
   }
 
+  onRowClick(post: Post) {
+    console.log('Clicked post:', post);
+    // TODO click logic navigation to specific post and display its page
+  }
 }
