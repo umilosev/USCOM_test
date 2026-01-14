@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Post } from '../models/post';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +9,7 @@ import { catchError } from 'rxjs/operators';
 export class PostService {
   apiPostsUrl = 'https://jsonplaceholder.typicode.com/posts';
 
-  getPosts(): Observable<any[]> {
+  getPosts(): Observable<Post[]> {
     return from(
       fetch(this.apiPostsUrl).then(response => {
         if (!response.ok) {
