@@ -22,7 +22,7 @@ export class PostList implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private postService: PostService) {
+  constructor(private postService: PostService, private router: Router) {
     this.posts$ = this.postService.getPosts();
   }
 
@@ -38,5 +38,6 @@ export class PostList implements OnInit {
   onRowClick(post: Post) {
     console.log('Clicked post:', post);
     // TODO click logic navigation to specific post and display its page
+    this.router.navigate([`/posts/${post.id}`]);
   }
 }

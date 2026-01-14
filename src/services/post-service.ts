@@ -24,5 +24,40 @@ export class PostService {
       })
     );
   }
-}
 
+  getPostComments(postId: number): Observable<any[]> {
+    const url = `${this.apiPostsUrl}/${postId}/comments`;
+    return from(
+      fetch(url).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        return response.json();
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching post comments:', error);
+        throw error;
+      })
+    );
+  }
+
+  filterPostsByUser(userId: number): Observable<Post[]> {
+    const url = `${this.apiPostsUrl}?userId=${userId}`;
+    return from(
+      fetch(url).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        return response.json();
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching filtered posts:', error);
+        throw error;
+      })
+    );
+  }
+
+  
+}
