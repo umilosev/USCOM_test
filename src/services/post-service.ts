@@ -98,5 +98,26 @@ export class PostService {
     );
   }
 
-  
+  addCommentToPost(postId: number, comment: Comment): Observable<Comment> {
+    const url = `${this.apiPostsUrl}/${postId}/comments`;
+    return from(
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(comment),
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        return response.json();
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error adding comment to post:', error);
+        throw error;
+      })
+    );
+  }
 }
