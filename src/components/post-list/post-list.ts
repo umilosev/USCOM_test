@@ -22,10 +22,11 @@ export class PostList implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private postService: PostService) {
+  constructor(private postService: PostService, private router: Router) {
     this.posts$ = this.postService.getPosts();
   }
 
+  // Initialize the component and the data source for the table
   ngOnInit() {
     this.posts$.subscribe(posts => {
       this.dataSource.data = posts;
@@ -35,8 +36,10 @@ export class PostList implements OnInit {
     });
   }
 
+  //routes to post page that we clicked
   onRowClick(post: Post) {
     console.log('Clicked post:', post);
-    // TODO click logic navigation to specific post and display its page
+    this.postService.setSelectedPost(post);
+    this.router.navigate([`/posts/${post.id}`]);
   }
 }

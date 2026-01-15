@@ -1,0 +1,30 @@
+<div class="post-container">
+  <div *ngIf="postLoading" class="loading-text">
+    <p>Loading post...</p>
+  </div>
+  <div *ngIf="!postLoading && post">
+    <h1 class="post-title">Post Title : {{ post.title }}</h1>
+    <p class="post-body">{{ post.body }}</p>
+    <div class="comments-section">
+      <ng-container *ngIf="commentsLoading">
+        <p class="loading-text">Loading comments...</p>
+      </ng-container>
+      <ng-container *ngIf="!commentsLoading && comments && comments.length > 0">
+        <h2 class="comments-title">Comments</h2>
+        <ul class="comment-list">
+          <li *ngFor="let comment of comments" class="comment-item">
+            <div class="comment-author">{{ comment.name }}</div>
+            <div class="comment-email">{{ comment.email }}</div>    
+            <div class="comment-body">{{ comment.body }}</div>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-container *ngIf="!commentsLoading && comments && comments.length === 0">
+        <p class="no-comments">No comments available.</p>
+      </ng-container>
+    </div>
+  </div>
+  <div *ngIf="!postLoading && !post" class="no-comments">
+    <p>No post selected.</p>
+  </div>
+</div>
