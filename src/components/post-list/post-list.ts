@@ -1,44 +1,63 @@
-import { Component, ViewChild, OnInit, AfterViewInit } from '@angular/core';
-import { PostService } from '../../services/post-service';
-import { Observable } from 'rxjs';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
-import { Post } from '../../models/post';
+import { MatDialog } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+
+import { PostService } from '../../services/post-service';
+import { Post } from '../../models/post';
+import { AddPostDialog } from '../add-post-dialog/add-post-dialog';
 
 @Component({
   selector: 'app-post-list',
-  imports: [CommonModule, MatTableModule, MatPaginatorModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './post-list.html',
   styleUrl: './post-list.css',
 })
 export class PostList implements OnInit {
-
   dataSource = new MatTableDataSource<Post>([]);
   displayedColumns: string[] = ['id', 'title', 'body'];
-  posts$: Observable<Post[]>;
+  isLoading = true;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private postService: PostService, private router: Router) {
-    this.posts$ = this.postService.getPosts();
-  }
+  constructor(
+    private postService: PostService,
+    private router: Router,
+    private dialog: MatDialog
+  ) {}
 
-  // Initialize the component and the data source for the table
   ngOnInit() {
-    this.posts$.subscribe(posts => {
-      this.dataSource.data = posts;
-      if (this.paginator) {
+    this.isLoading = true;
+
+    this.postService.getPosts().subscribe({
+      next: posts => {
+        this.dataSource.data = posts;
         this.dataSource.paginator = this.paginator;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
       }
     });
   }
 
-  //routes to post page that we clicked
+  openDialog(): void {
+    this.dialog.open(AddPostDialog, {
+      width: '1700px',
+    });
+  }
+
   onRowClick(post: Post) {
-    console.log('Clicked post:', post);
     this.postService.setSelectedPost(post);
     this.router.navigate([`/posts/${post.id}`]);
   }
