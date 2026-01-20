@@ -11,6 +11,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Post } from '../../models/post';
+import { PostService } from '../../services/post-service';
 
 @Component({
   selector: 'app-add-post-dialog',
@@ -30,13 +31,22 @@ import { Post } from '../../models/post';
 export class AddPostDialog {
   private dialogRef = inject(MatDialogRef<AddPostDialog>);
   private data = inject<Post | null>(MAT_DIALOG_DATA);
+  private postService = inject(PostService);
 
   post: Post = this.data
     ? { ...this.data }
     : { userId: 0, id: 0, title: '', email: '',body: '' };
 
   save(): void {
-    this.dialogRef.close(this.post);
+    this.postService.addPost(this.post).subscribe({
+      next: (createdPost) => {
+        console.log('Post created successfully:', createdPost);
+        this.dialogRef.close(createdPost);
+      },
+      error: (error) => {
+        console.error('Failed to create post:', error);
+      }
+    });
   }
 
   cancel(): void {
