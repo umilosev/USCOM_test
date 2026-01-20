@@ -1,19 +1,20 @@
 <h2 mat-dialog-title>Add Post</h2>
 
-<mat-dialog-content>
+<mat-dialog-content [formGroup]="postForm" class="dialog-content">
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Title</mat-label>
     <input 
       matInput
-      [(ngModel)]="post.title" 
       placeholder="Post title"
-      [formControl]="title"
-      (blur)="updateTitleMessage()"
+      formControlName="title"
       required
     />
-    @if (title.invalid) {
-      <mat-error>{{titleErrorMessage()}}</mat-error>
-    }
+    <mat-error *ngIf="postForm.get('title')?.hasError('required')">
+      Title is required
+    </mat-error>
+    <mat-error *ngIf="postForm.get('title')?.hasError('minlength')">
+      Title must be at least 5 characters
+    </mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
@@ -22,27 +23,33 @@
     matInput 
     placeholder="Write your post here..."
     rows="4" 
-    [formControl]="body"
-    (blur)="updateBodyMessage()"
-    [(ngModel)]="post.body">
+    formControlName="body"
+    required
+    >
   </textarea>
-    @if (body.invalid) {
-      <mat-error>{{bodyErrorMessage()}}</mat-error>
-    }
+    <mat-error *ngIf="postForm.get('body')?.hasError('required')">
+      Body is required
+    </mat-error>
+    <mat-error *ngIf="postForm.get('body')?.hasError('minlength')">
+      Body must be at least 10 characters
+    </mat-error>
   </mat-form-field>
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Author email</mat-label>
         <input 
         matInput 
         placeholder="john@doe.com"
-        [formControl]="email"
+        formControlName="email"
         (blur)="updateEmailMessage()"
         required 
-        [(ngModel)]="post.email"
         />
-    @if (email.invalid) {
-      <mat-error>{{emailErrorMessage()}}</mat-error>
-    }
+    <mat-error *ngIf="postForm.get('email')?.hasError('required')">
+      Email is required
+    </mat-error>
+    <mat-error *ngIf="postForm.get('email')?.hasError('email')">
+      Not a valid email
+    </mat-error>
+
     </mat-form-field>
 </mat-dialog-content>
 
@@ -51,5 +58,6 @@
   <button 
   mat-raised-button 
   color="primary" 
+  [disabled]="!postForm.valid"
   (click)="save()">Save</button>
 </mat-dialog-actions>

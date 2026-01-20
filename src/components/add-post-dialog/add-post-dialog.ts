@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormsModule , Validators} from '@angular/forms';
+import { FormControl, FormGroup, FormsModule , Validators} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +17,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { signal } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
 
 
 
@@ -24,7 +25,6 @@ import { signal } from '@angular/core';
   selector: 'app-add-post-dialog',
   standalone: true,
   imports: [
-    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -32,6 +32,7 @@ import { signal } from '@angular/core';
     MatDialogContent,
     MatDialogActions,
     ReactiveFormsModule,
+    CommonModule
   ],
   templateUrl: './add-post-dialog.html',
   styleUrl: './add-post-dialog.css',
@@ -42,43 +43,58 @@ export class AddPostDialog {
   private data = inject<Post | null>(MAT_DIALOG_DATA);
   private postService = inject(PostService);
   private snackBar = inject(MatSnackBar);
-  readonly email = new FormControl('',[Validators.required, Validators.email]);
-  readonly title = new FormControl('',[Validators.required, Validators.minLength(5)]);
-  readonly body = new FormControl('',[Validators.required, Validators.minLength(10)]);
 
+  postForm = new FormGroup({
+    email: new FormControl<string>('',{
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    title: new FormControl<string>('',{
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(5)],
+    }),
+    body: new FormControl<string>('',{
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(10)],  
+    }),
+  });
   titleErrorMessage = signal('');
   bodyErrorMessage = signal('');
   emailErrorMessage = signal('');
 
   constructor() {
-    merge(this.email.statusChanges, 
-      this.email.valueChanges)
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateEmailMessage());
-    merge(this.title.statusChanges, 
-      this.title.valueChanges)
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateTitleMessage());
-    merge(this.body.statusChanges, 
-      this.body.valueChanges)
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateBodyMessage());
+    if (this.data) {
+      this.postForm.patchValue({
+        title: this.data.title,
+        body: this.data.body,
+        email: this.data.email,
+      });
+    }
   }
-  post: Post = this.data
-    ? { ...this.data }
-    : { userId: 2, id: 101, title: '', email: '', body: '' };
+
   save(): void {
-    this.postService.addPost(this.post).subscribe({
+    if (this.postForm.invalid) {
+      this.postForm.markAllAsTouched();
+      return;
+    }
+
+    const post: Post = {
+      userId: this.data?.userId ?? 2,
+      id: this.data?.id ?? 101,
+      ...this.postForm.getRawValue(),
+    };
+    this.postService.addPost(post).subscribe({
       next: (createdPost) => {
-        console.log('Post created successfully:', createdPost);
+        this.snackBar.open('Post added successfully!', 'Close', {
+          duration: 3000,
+        });
         this.dialogRef.close(createdPost);
       },
-      error: (error) => {
-        console.error('Failed to create post:', error);
-      }
-    });
-    this.snackBar.open('Post added successfully!', 'Close', {
-      duration: 3000,
+      error: () => {
+        this.snackBar.open('Failed to add post', 'Close', {
+          duration: 3000,
+        });
+      },
     });
   }
   cancel(): void {
@@ -89,27 +105,27 @@ export class AddPostDialog {
   }
 
   updateEmailMessage() {
-    if (this.email.hasError('required')) {
+    if (this.postForm.get('email')?.hasError('required')) {
       this.emailErrorMessage.set('You must enter a value');
-    } else if (this.email.hasError('email')) {
+    } else if (this.postForm.get('email')?.hasError('email')) {
       this.emailErrorMessage.set('Not a valid email');
     } else {
       this.emailErrorMessage.set('');
     }
   }
   updateBodyMessage() {
-    if (this.body.hasError('required')) {
+    if (this.postForm.get('body')?.hasError('required')) {
       this.bodyErrorMessage.set('You must enter a value');
-    } else if (this.body.hasError('minlength')) {
+    } else if (this.postForm.get('body')?.hasError('minlength')) {
       this.bodyErrorMessage.set('Body must be at least 10 characters long');
     } else {
       this.bodyErrorMessage.set('');
     }
   }
   updateTitleMessage() {
-    if (this.title.hasError('required')) {
+    if (this.postForm.get('title')?.hasError('required')) {
       this.titleErrorMessage.set('You must enter a value');
-    } else if (this.title.hasError('minlength')) {
+    } else if (this.postForm.get('title')?.hasError('minlength')) {
       this.titleErrorMessage.set('Title must be at least 5 characters long');
     } else {
       this.titleErrorMessage.set('');
