@@ -41,8 +41,6 @@ export class AddPostDialog {
   
   private dialogRef = inject(MatDialogRef<AddPostDialog>);
   private data = inject<Post | null>(MAT_DIALOG_DATA);
-  private postService = inject(PostService);
-  private snackBar = inject(MatSnackBar);
 
   postForm = new FormGroup({
     email: new FormControl<string>('',{
@@ -58,18 +56,9 @@ export class AddPostDialog {
       validators: [Validators.required, Validators.minLength(10)],  
     }),
   });
-  titleErrorMessage = signal('');
-  bodyErrorMessage = signal('');
-  emailErrorMessage = signal('');
 
   constructor() {
-    if (this.data) {
-      this.postForm.patchValue({
-        title: this.data.title,
-        body: this.data.body,
-        email: this.data.email,
-      });
-    }
+
   }
 
   save(): void {

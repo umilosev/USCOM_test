@@ -37,13 +37,17 @@ export class PostList implements OnInit {
     private snackBar: MatSnackBar,
   ) {}
 
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+  
   ngOnInit() {
     this.isLoading = true;
 
     this.postService.getPosts().subscribe({
       next: posts => {
         this.dataSource.data = posts;
-        this.dataSource.paginator = this.paginator;
         this.isLoading = false;
       },
       error: () => {
