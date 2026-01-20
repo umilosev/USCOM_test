@@ -97,12 +97,99 @@ export class PostService {
       })
     );
   }
+  // POST / PUT / DELETE methods for posts
+  addPost(post: Post): Observable<Post> {
+    return from(
+      fetch(this.apiPostsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(post),
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        return response.json();
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error creating post:', error);
+        throw error;
+      })
+    );
+  }
 
-  addCommentToPost(postId: number, comment: Comment): Observable<Comment> {
-    const url = `${this.apiPostsUrl}/${postId}/comments`;
+  editPost(post: Post): Observable<Post> {
+    const url = `${this.apiPostsUrl}/${post.id}`;
     return from(
       fetch(url, {
-        method: 'POST',
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(post),
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        return response.json();
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error editing post:', error);
+        throw error;
+      })
+    );
+  }
+
+  deletePost(postId: number): Observable<void> {
+    const url = `${this.apiPostsUrl}/${postId}`;
+    return from(
+      fetch(url, {
+        method: 'DELETE',
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting post:', error);
+        throw error;
+      })
+    );
+  }
+
+  // POST / PUT / DELETE methods for comments
+  addCommentToPost(postId: number, comment: Comment): Observable<Comment> {
+  const url = `${this.apiPostsUrl}/${postId}/comments`;
+  return from(
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+       body: JSON.stringify(comment),
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      return response.json();
+          })
+    ).pipe(
+      catchError(error => {
+        console.error('Error adding comment to post:', error);
+        throw error;
+      })
+    );
+  }
+
+  editComment(comment: Comment): Observable<Comment> {
+    const url = '${this.apiPostsUrl}/comments/${comment.id}';
+    return from(
+      fetch(url, {
+        method:'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -115,7 +202,25 @@ export class PostService {
       })
     ).pipe(
       catchError(error => {
-        console.error('Error adding comment to post:', error);
+        console.error('Error editing comment:', error);
+        throw error;
+      })
+    );
+  }
+
+  deleteComment(commentId: number): Observable<void> {
+    const url = `${this.apiPostsUrl}/comments/${commentId}`;
+    return from(
+      fetch(url, {
+        method: 'DELETE',
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+      })
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting comment:', error);
         throw error;
       })
     );

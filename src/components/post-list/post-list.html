@@ -1,6 +1,9 @@
 <p>post-list works!</p>
 
 <div class="table-container">
+    <li>
+    <button matButton="elevated" justified-content="right" (click)="openDialog()">Add post</button>
+  </li>
   <table mat-table [dataSource]="dataSource" class="custom-table">
     <!-- ID Column -->
     <ng-container matColumnDef="id">
