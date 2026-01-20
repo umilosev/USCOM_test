@@ -3,7 +3,8 @@ import { Observable, from, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Post } from '../models/post';
 import { Comment } from '../models/comment';
-
+import { tap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
@@ -12,9 +13,16 @@ export class PostService {
 
   private selectedPostSubject = new BehaviorSubject<Post | null>(null);
   selectedPost$ = this.selectedPostSubject.asObservable();
+  cachedPosts: Post[] = [];
+  private snackBar = new MatSnackBar();
 
   //returns all posts
   getPosts(): Observable<Post[]> {
+    if (this.cachedPosts.length > 0) {
+      // Return cached posts as an observable
+      return from([this.cachedPosts]);
+    }
+
     return from(
       fetch(this.apiPostsUrl).then(response => {
         if (!response.ok) {
@@ -25,10 +33,15 @@ export class PostService {
     ).pipe(
       catchError(error => {
         console.error('Error fetching posts:', error);
-        throw error; // Re-throw to let subscribers handle
+        throw error;
+      }),
+      // Cache the fetched posts
+      tap((posts: Post[]) => {
+        this.cachedPosts = posts;
       })
     );
   }
+
 
   //sets that is passed to be the selected post
   setSelectedPost(post: Post) {
@@ -82,20 +95,17 @@ export class PostService {
   //instead of making a new API call for each filter
   //we would filter locally based on the cached posts data
   filterPostsByUser(userId: number): Observable<Post[]> {
-    const url = `${this.apiPostsUrl}?userId=${userId}`;
-    return from(
-      fetch(url).then(response => {
-        if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
-        }
-        return response.json();
-      })
-    ).pipe(
-      catchError(error => {
-        console.error('Error fetching filtered posts:', error);
-        throw error;
-      })
-    );
+    if (this.cachedPosts.length > 0) {
+        const filtered = this.cachedPosts.filter(post => post.userId === userId);
+        return from([filtered]);
+      } 
+      // Otherwise, fetch posts first
+      return this.getPosts().pipe(
+        tap(() => {
+          return this.cachedPosts.filter(post => post.userId === userId);
+        })
+      );
+
   }
   // POST / PUT / DELETE methods for posts
   addPost(post: Post): Observable<Post> {
@@ -144,6 +154,7 @@ export class PostService {
   }
 
   deletePost(postId: number): Observable<void> {
+    this.cachedPosts = this.cachedPosts.filter(post => post.id !== postId);
     const url = `${this.apiPostsUrl}/${postId}`;
     return from(
       fetch(url, {

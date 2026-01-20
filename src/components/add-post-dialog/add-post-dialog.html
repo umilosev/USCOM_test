@@ -40,7 +40,6 @@
         matInput 
         placeholder="john@doe.com"
         formControlName="email"
-        (blur)="updateEmailMessage()"
         required 
         />
     <mat-error *ngIf="postForm.get('email')?.hasError('required')">

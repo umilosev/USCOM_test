@@ -83,52 +83,10 @@ export class AddPostDialog {
       id: this.data?.id ?? 101,
       ...this.postForm.getRawValue(),
     };
-    this.postService.addPost(post).subscribe({
-      next: (createdPost) => {
-        this.snackBar.open('Post added successfully!', 'Close', {
-          duration: 3000,
-        });
-        this.dialogRef.close(createdPost);
-      },
-      error: () => {
-        this.snackBar.open('Failed to add post', 'Close', {
-          duration: 3000,
-        });
-      },
-    });
+
+    this.dialogRef.close(post);
   }
   cancel(): void {
-    this.dialogRef.close();
-    this.snackBar.open('Cancelled!', 'Close', {
-      duration: 3000,
-    });
-  }
-
-  updateEmailMessage() {
-    if (this.postForm.get('email')?.hasError('required')) {
-      this.emailErrorMessage.set('You must enter a value');
-    } else if (this.postForm.get('email')?.hasError('email')) {
-      this.emailErrorMessage.set('Not a valid email');
-    } else {
-      this.emailErrorMessage.set('');
-    }
-  }
-  updateBodyMessage() {
-    if (this.postForm.get('body')?.hasError('required')) {
-      this.bodyErrorMessage.set('You must enter a value');
-    } else if (this.postForm.get('body')?.hasError('minlength')) {
-      this.bodyErrorMessage.set('Body must be at least 10 characters long');
-    } else {
-      this.bodyErrorMessage.set('');
-    }
-  }
-  updateTitleMessage() {
-    if (this.postForm.get('title')?.hasError('required')) {
-      this.titleErrorMessage.set('You must enter a value');
-    } else if (this.postForm.get('title')?.hasError('minlength')) {
-      this.titleErrorMessage.set('Title must be at least 5 characters long');
-    } else {
-      this.titleErrorMessage.set('');
-    }
+    this.dialogRef.close(null);
   }
 }
