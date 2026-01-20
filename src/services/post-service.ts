@@ -4,7 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { Post } from '../models/post';
 import { Comment } from '../models/comment';
 import { tap } from 'rxjs/operators';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,6 +14,8 @@ export class PostService {
   private selectedPostSubject = new BehaviorSubject<Post | null>(null);
   selectedPost$ = this.selectedPostSubject.asObservable();
   cachedPosts: Post[] = [];
+  private snackBar = new MatSnackBar();
+
   //returns all posts
   getPosts(): Observable<Post[]> {
     if (this.cachedPosts.length > 0) {

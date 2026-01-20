@@ -5,12 +5,11 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-
 import { PostService } from '../../services/post-service';
 import { Post } from '../../models/post';
 import { AddPostDialog } from '../add-post-dialog/add-post-dialog';
 import { DeletePostDialog } from '../delete-post-dialog/delete-post-dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-post-list',
@@ -34,8 +33,8 @@ export class PostList implements OnInit {
   constructor(
     private postService: PostService,
     private router: Router,
-    private dialog: MatDialog
-
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit() {
@@ -54,10 +53,37 @@ export class PostList implements OnInit {
   }
 
   openAddPostDialog(): void {
-    this.dialog.open(AddPostDialog, {
-      width: '1700px',
+    const dialogRef = this.dialog.open(AddPostDialog, {
+      width: '600px', // smaller width is usually fine
+    });
+
+    dialogRef.afterClosed().subscribe((post: Post | null) => {
+      if (post) {
+        // Call the service to actually add the post
+        this.postService.addPost(post).subscribe({
+          next: (newPost) => {
+            // Update the cached posts
+            this.postService.cachedPosts.push(newPost);
+
+            // Update the table
+            this.dataSource.data = this.postService.cachedPosts;
+            this.dataSource.paginator = this.paginator;
+
+            // Show success notification
+            this.snackBar.open('Post added successfully!', 'Close', { duration: 2000 });
+          },
+          error: (err) => {
+            console.error('Error adding post:', err);
+            this.snackBar.open('Failed to add post!', 'Close', { duration: 2000 });
+          }
+        });
+      } else {
+        // User cancelled
+        this.snackBar.open('Add post cancelled.', 'Close', { duration: 2000 });
+      }
     });
   }
+
 
   onRowClick(post: Post) {
     this.postService.setSelectedPost(post);
@@ -65,9 +91,27 @@ export class PostList implements OnInit {
   }
 
   openDeletePostDialog(post: Post) {
-    this.dialog.open(DeletePostDialog,{
-      width: '400px',
-      data: post
+    const dialogRef = this.dialog.open(DeletePostDialog, { width: '400px', data: post });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.postService.deletePost(post.id).subscribe(() => {
+          this.removePostFromTable(post.id);
+        });
+        this.snackBar.open('Post deleted!', 'Close', {});
+      } else {
+          this.snackBar.open('Post deletion cancelled!', 'Close', {});
+
+      }
     });
   }
+
+  removePostFromTable(postId: number) {
+  // Update the dataSource.data array
+  this.dataSource.data = this.dataSource.data.filter(p => p.id !== postId);
+
+  // Optional: also update cachedPosts in your service
+  this.postService.cachedPosts = this.postService.cachedPosts.filter(p => p.id !== postId);
+  }
+  
 }
