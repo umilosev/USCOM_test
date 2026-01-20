@@ -4,22 +4,52 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Title</mat-label>
     <input 
-      matInput 
+      matInput
       [(ngModel)]="post.title" 
+      placeholder="Post title"
+      [formControl]="title"
+      (blur)="updateTitleMessage()"
+      required
     />
+    @if (title.invalid) {
+      <mat-error>{{titleErrorMessage()}}</mat-error>
+    }
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Body</mat-label>
-    <textarea matInput rows="4" [(ngModel)]="post.body"></textarea>
+    <textarea 
+    matInput 
+    placeholder="Write your post here..."
+    rows="4" 
+    [formControl]="body"
+    (blur)="updateBodyMessage()"
+    [(ngModel)]="post.body">
+  </textarea>
+    @if (body.invalid) {
+      <mat-error>{{bodyErrorMessage()}}</mat-error>
+    }
   </mat-form-field>
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Author email</mat-label>
-        <input matInput [(ngModel)]="post.email"/>
+        <input 
+        matInput 
+        placeholder="john@doe.com"
+        [formControl]="email"
+        (blur)="updateEmailMessage()"
+        required 
+        [(ngModel)]="post.email"
+        />
+    @if (email.invalid) {
+      <mat-error>{{emailErrorMessage()}}</mat-error>
+    }
     </mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="save()">Save</button>
+  <button 
+  mat-raised-button 
+  color="primary" 
+  (click)="save()">Save</button>
 </mat-dialog-actions>
