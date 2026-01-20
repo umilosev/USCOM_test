@@ -12,7 +12,6 @@ export class PostService {
 
   private selectedPostSubject = new BehaviorSubject<Post | null>(null);
   selectedPost$ = this.selectedPostSubject.asObservable();
-
   //returns all posts
   getPosts(): Observable<Post[]> {
     return from(
@@ -27,7 +26,7 @@ export class PostService {
         console.error('Error fetching posts:', error);
         throw error; // Re-throw to let subscribers handle
       })
-    );
+    )
   }
 
   //sets that is passed to be the selected post
