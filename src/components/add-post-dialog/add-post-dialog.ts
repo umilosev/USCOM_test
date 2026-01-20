@@ -12,6 +12,8 @@ import {
 } from '@angular/material/dialog';
 import { Post } from '../../models/post';
 import { PostService } from '../../services/post-service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-add-post-dialog',
@@ -24,6 +26,7 @@ import { PostService } from '../../services/post-service';
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
+    ReactiveFormsModule,
   ],
   templateUrl: './add-post-dialog.html',
   styleUrl: './add-post-dialog.css',
@@ -32,10 +35,12 @@ export class AddPostDialog {
   private dialogRef = inject(MatDialogRef<AddPostDialog>);
   private data = inject<Post | null>(MAT_DIALOG_DATA);
   private postService = inject(PostService);
+  private snackBar = inject(MatSnackBar);
+
 
   post: Post = this.data
     ? { ...this.data }
-    : { userId: 0, id: 0, title: '', email: '',body: '' };
+    : { userId: 2, id: 101, title: '', email: '', body: '' };
 
   save(): void {
     this.postService.addPost(this.post).subscribe({
@@ -47,9 +52,15 @@ export class AddPostDialog {
         console.error('Failed to create post:', error);
       }
     });
+    this.snackBar.open('Post added successfully!', 'Close', {
+      duration: 3000,
+    });
   }
 
   cancel(): void {
     this.dialogRef.close();
+    this.snackBar.open('Cancelled!', 'Close', {
+      duration: 3000,
+    });
   }
 }
