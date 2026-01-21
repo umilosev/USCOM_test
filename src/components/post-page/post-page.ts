@@ -19,7 +19,6 @@ import { MatList, MatListItem } from '@angular/material/list';
   selector: 'app-post-page',
   imports: [
     CommonModule,
-    MatProgressSpinner,
     MatCard,
     MatDivider,
     MatCardHeader,
@@ -47,7 +46,7 @@ export class PostPage implements OnInit {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
   ) {}
-
+  //
   ngOnInit() {
     this.route.params.subscribe(params => {
       const id = +params['id'];
