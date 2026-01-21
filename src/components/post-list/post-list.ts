@@ -10,6 +10,8 @@ import { Post } from '../../models/post';
 import { AddPostDialog } from '../dialog/add-post-dialog/add-post-dialog';
 import { DeletePostDialog } from '../dialog/delete-post-dialog/delete-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-post-list',
@@ -28,6 +30,9 @@ export class PostList implements OnInit {
   displayedColumns: string[] = ['id', 'title', 'body', 'actions'];
   isLoading = true;
 
+  searchQuery: string = '';
+  private searchSubject = new Subject<string>();
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
@@ -37,7 +42,6 @@ export class PostList implements OnInit {
     private snackBar: MatSnackBar,
   ) {}
 
-
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
@@ -45,17 +49,47 @@ export class PostList implements OnInit {
   ngOnInit() {
     this.isLoading = true;
 
+    // Subscribe to cached posts
     this.postService.cachedPosts$.subscribe(posts => {
-      this.dataSource.data = posts;
+      this.applyFilter(this.searchQuery, posts);
       this.isLoading = false;
-
-      // paginator must be reassigned when data changes
-      this.dataSource.paginator = this.paginator;
     });
 
-    // trigger initial load
+    // Trigger initial load
     this.postService.getPosts().subscribe();
+
+    // Handle search with debounce
+    this.searchSubject.pipe(
+      debounceTime(300) // wait 300ms after the last keystroke
+    ).subscribe(query => {
+      this.searchQuery = query;
+      const posts = this.postService.cachedPostsSubject.value;
+      this.applyFilter(query, posts);
+    });
   }
+
+  onSearchInput(event: any) {
+    this.searchSubject.next(event.target.value);
+  }
+
+  private applyFilter(query: string, posts: Post[]) {
+    if (!query) {
+      this.dataSource.data = [...posts]; // create a new array reference
+    } else {
+      const lowerQuery = query.toLowerCase();
+      this.dataSource.data = posts.filter(post =>
+        post.title.toLowerCase().includes(lowerQuery) ||
+        post.body.toLowerCase().includes(lowerQuery) ||
+        post.email.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // reset paginator to first page on filter
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
 
 
   openAddPostDialog(): void {
