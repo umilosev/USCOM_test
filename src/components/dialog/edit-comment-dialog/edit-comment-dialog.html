@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Add Post</h2>
+
+<mat-dialog-content [formGroup]="commentForm" class="dialog-content">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Title</mat-label>
+    <input 
+      matInput
+      placeholder="Post title"
+      formControlName="name"
+      required
+    />
+    <mat-error *ngIf="commentForm.get('name')?.hasError('required')">
+      Title is required
+    </mat-error>
+    <mat-error *ngIf="commentForm.get('name')?.hasError('minlength')">
+      Title must be at least 5 characters
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Body</mat-label>
+    <textarea 
+    matInput 
+    placeholder="Write your post here..."
+    rows="4" 
+    formControlName="body"
+    required
+    >
+  </textarea>
+    <mat-error *ngIf="commentForm.get('body')?.hasError('required')">
+      Body is required
+    </mat-error>
+    <mat-error *ngIf="commentForm.get('body')?.hasError('minlength')">
+      Body must be at least 10 characters
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Author email</mat-label>
+        <input 
+        matInput 
+        placeholder="john@doe.com"
+        formControlName="email"
+        required 
+        />
+    <mat-error *ngIf="commentForm.get('email')?.hasError('required')">
+      Email is required
+    </mat-error>
+    <mat-error *ngIf="commentForm.get('email')?.hasError('email')">
+      Not a valid email
+    </mat-error>
+
+    </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button 
+  mat-raised-button 
+  color="primary" 
+  [disabled]="!commentForm.valid"
+  (click)="save()">Save</button>
+</mat-dialog-actions>
