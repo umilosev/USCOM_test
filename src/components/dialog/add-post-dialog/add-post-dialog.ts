@@ -13,6 +13,7 @@ import {
 import { Post } from '../../../models/post';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { PostService } from '../../../services/post-service';
 
 
 
@@ -37,6 +38,8 @@ export class AddPostDialog {
   private dialogRef = inject(MatDialogRef<AddPostDialog>);
   private data = inject<Post | null>(MAT_DIALOG_DATA);
 
+  constructor(private postService : PostService){}
+
   postForm = new FormGroup({
     email: new FormControl<string>('',{
       nonNullable: true,
@@ -60,7 +63,7 @@ export class AddPostDialog {
 
     const post: Post = {
       userId: this.data?.userId ?? 2,
-      id: this.data?.id ?? 101,
+      id: this.postService.cachedPostsSubject.value.length + 1,
       ...this.postForm.getRawValue(),
     };
 

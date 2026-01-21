@@ -117,8 +117,8 @@
             return this.cachedPostsSubject.value.filter(post => post.userId === userId);
           })
         );
-
     }
+    
     // POST / PUT / DELETE methods for posts
     addPost(post: Post): Observable<Post> {
       return from(
