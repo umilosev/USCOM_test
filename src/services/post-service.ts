@@ -4,7 +4,6 @@ import { catchError } from 'rxjs/operators';
 import { Post } from '../models/post';
 import { Comment } from '../models/comment';
 import { tap } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
@@ -13,14 +12,15 @@ export class PostService {
 
   private selectedPostSubject = new BehaviorSubject<Post | null>(null);
   selectedPost$ = this.selectedPostSubject.asObservable();
-  cachedPosts: Post[] = [];
-  private snackBar = new MatSnackBar();
+  public cachedPostsSubject = new BehaviorSubject<Post[]>([]);
+  public cachedPosts$ = this.cachedPostsSubject.asObservable();
+
 
   //returns all posts
   getPosts(): Observable<Post[]> {
-    if (this.cachedPosts.length > 0) {
+    if (this.cachedPostsSubject.value.length > 0) {
       // Return cached posts as an observable
-      return from([this.cachedPosts]);
+      return from([this.cachedPostsSubject.value]);
     }
 
     return from(
@@ -37,7 +37,7 @@ export class PostService {
       }),
       // Cache the fetched posts
       tap((posts: Post[]) => {
-        this.cachedPosts = posts;
+        this.cachedPostsSubject.next(posts);
       })
     );
   }
@@ -95,14 +95,14 @@ export class PostService {
   //instead of making a new API call for each filter
   //we would filter locally based on the cached posts data
   filterPostsByUser(userId: number): Observable<Post[]> {
-    if (this.cachedPosts.length > 0) {
-        const filtered = this.cachedPosts.filter(post => post.userId === userId);
+    if (this.cachedPostsSubject.value.length > 0) {
+        const filtered = this.cachedPostsSubject.value.filter(post => post.userId === userId);
         return from([filtered]);
       } 
       // Otherwise, fetch posts first
       return this.getPosts().pipe(
         tap(() => {
-          return this.cachedPosts.filter(post => post.userId === userId);
+          return this.cachedPostsSubject.value.filter(post => post.userId === userId);
         })
       );
 
@@ -132,12 +132,11 @@ export class PostService {
 
   editPost(post: Post): Observable<Post> {
     const url = `${this.apiPostsUrl}/${post.id}`;
+
     return from(
       fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(post),
       }).then(response => {
         if (!response.ok) {
@@ -146,15 +145,26 @@ export class PostService {
         return response.json();
       })
     ).pipe(
-      catchError(error => {
-        console.error('Error editing post:', error);
-        throw error;
+      tap(updatedPost => {
+        const posts = this.cachedPostsSubject.value;
+        const index = posts.findIndex(p => p.id === updatedPost.id);
+
+        if (index !== -1) {
+          const updatedPosts = [...posts];
+          updatedPosts[index] = updatedPost;
+          this.cachedPostsSubject.next(
+            this.cachedPostsSubject.value.map(p =>
+                p.id === updatedPost.id ? updatedPost : p
+              )
+          );
+        }
       })
     );
   }
 
+
   deletePost(postId: number): Observable<void> {
-    this.cachedPosts = this.cachedPosts.filter(post => post.id !== postId);
+    this.cachedPostsSubject.next(this.cachedPostsSubject.value.filter(post => post.id !== postId));
     const url = `${this.apiPostsUrl}/${postId}`;
     return from(
       fetch(url, {
@@ -236,4 +246,17 @@ export class PostService {
       })
     );
   }
+
+  updatePostInCache(updatedPost: Post) {
+    const updated = this.cachedPostsSubject.value.map(post =>
+      post.id === updatedPost.id ? updatedPost : post
+    );
+
+    this.cachedPostsSubject.next(updated);
+
+    if (this.selectedPostSubject.value?.id === updatedPost.id) {
+      this.selectedPostSubject.next(updatedPost);
+    }
+  }
+
 }

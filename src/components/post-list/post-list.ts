@@ -41,20 +41,22 @@ export class PostList implements OnInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
-  
+
   ngOnInit() {
     this.isLoading = true;
 
-    this.postService.getPosts().subscribe({
-      next: posts => {
-        this.dataSource.data = posts;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      }
+    this.postService.cachedPosts$.subscribe(posts => {
+      this.dataSource.data = posts;
+      this.isLoading = false;
+
+      // paginator must be reassigned when data changes
+      this.dataSource.paginator = this.paginator;
     });
+
+    // trigger initial load
+    this.postService.getPosts().subscribe();
   }
+
 
   openAddPostDialog(): void {
     const dialogRef = this.dialog.open(AddPostDialog, {
@@ -66,21 +68,18 @@ export class PostList implements OnInit {
         // Call the service to actually add the post
         this.postService.addPost(post).subscribe({
           next: (newPost) => {
-            // Update the cached posts
-            this.postService.cachedPosts.push(newPost);
+            this.postService.cachedPostsSubject.next([
+              ...this.postService.cachedPostsSubject.value,
+              newPost
+            ]);
 
-            // Update the table
-            this.dataSource.data = this.postService.cachedPosts;
-            this.dataSource.paginator = this.paginator;
+    this.snackBar.open('Post added successfully!', 'Close', { duration: 2000 });
+  },
+  error: () => {
+    this.snackBar.open('Failed to add post!', 'Close', { duration: 2000 });
+  }
+});
 
-            // Show success notification
-            this.snackBar.open('Post added successfully!', 'Close', { duration: 2000 });
-          },
-          error: (err) => {
-            console.error('Error adding post:', err);
-            this.snackBar.open('Failed to add post!', 'Close', { duration: 2000 });
-          }
-        });
       } else {
         // User cancelled
         this.snackBar.open('Add post cancelled.', 'Close', { duration: 2000 });
@@ -115,7 +114,7 @@ export class PostList implements OnInit {
   this.dataSource.data = this.dataSource.data.filter(p => p.id !== postId);
 
   // Optional: also update cachedPosts in your service
-  this.postService.cachedPosts = this.postService.cachedPosts.filter(p => p.id !== postId);
+  this.postService.cachedPostsSubject.next(this.postService.cachedPostsSubject.value.filter(p => p.id !== postId));
   }
   
 }

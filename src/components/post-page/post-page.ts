@@ -4,6 +4,9 @@ import { ActivatedRoute } from '@angular/router';
 import { PostService } from '../../services/post-service';
 import { Post } from '../../models/post';
 import { Comment } from '../../models/comment';
+import { MatDialog } from '@angular/material/dialog';
+import { EditPostDialog } from '../edit-post-dialog/edit-post-dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-post-page',
@@ -17,34 +20,41 @@ export class PostPage implements OnInit {
   commentsLoading: boolean = false;
   postLoading: boolean = false;
 
-  constructor(private postService: PostService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
+
+  constructor(
+    private postService: PostService, 
+    private route: ActivatedRoute, 
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+  ) {}
 
   ngOnInit() {
+    // Subscribe to selected post
+    this.postService.selectedPost$.subscribe(post => {
+      this.post = post;
+      this.cdr.detectChanges(); // force Angular to update the template
+    });
+
+    // Also subscribe to route params to fetch a new post if needed
     this.route.params.subscribe(params => {
       const id = +params['id'];
-      if (id) {
-        this.post = this.postService.getSelectedPost();
-        if (this.post && this.post.id === id) {
-          // Same post, just load comments if not already loaded
-          if (!this.comments && !this.commentsLoading) {
-            this.loadComments(id);
-          }
-        } else {
-          // Different post or no cached post, reset and fetch
-          this.post = null;
-          this.comments = null;
-          this.postLoading = true;
-          this.postService.getPostById(id).subscribe(post => {
-            this.post = post;
-            this.postService.setSelectedPost(post);
-            this.postLoading = false;
-            this.loadComments(post.id);
-            this.cdr.detectChanges();
-          });
-        }
+      if (!id) return;
+
+      // Check if current selected post matches id
+      if (!this.post || this.post.id !== id) {
+        this.postLoading = true;
+        this.postService.getPostById(id).subscribe(post => {
+          this.postService.setSelectedPost(post); // automatically updates subscription
+          this.postLoading = false;
+          this.loadComments(post.id);
+        });
+      } else if (!this.comments) {
+        this.loadComments(id);
       }
     });
   }
+
 
   private loadComments(postId: number) {
     this.commentsLoading = true;
@@ -62,5 +72,34 @@ export class PostPage implements OnInit {
         this.comments = [];
       }
     });
+  }
+
+  public editPost(): void {
+    const dialogRef = this.dialog.open(EditPostDialog, {
+      width: '400px',
+      data: this.post,
+    });
+
+    dialogRef.afterClosed().subscribe((editedPost: Post | null) => {
+      if (!editedPost) {
+        this.snackBar.open('Post editing cancelled!', 'Close', { duration: 2000 });
+        return;
+      }
+
+      this.postService.editPost(editedPost).subscribe({
+        next: (savedPost) => {
+          // Update the service cache
+          this.postService.updatePostInCache(savedPost); // this updates cachedPosts AND selectedPost$
+          this.snackBar.open('Post edited!', 'Close', { duration: 2000 });
+        },
+        error: () => {
+          this.snackBar.open('Failed to edit post!', 'Close', { duration: 2000 });
+        }
+      });
+    });
+  }
+
+  public editPostFromTable(post: Post) {
+    this.post = this.postService.getSelectedPost();
   }
 }
