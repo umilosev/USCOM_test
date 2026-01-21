@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, FormsModule , Validators} from '@angular/forms';
+import { FormControl, FormGroup , Validators} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,13 +11,8 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Post } from '../../models/post';
-import { PostService } from '../../services/post-service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { signal } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -56,10 +51,6 @@ export class AddPostDialog {
       validators: [Validators.required, Validators.minLength(10)],  
     }),
   });
-
-  constructor() {
-
-  }
 
   save(): void {
     if (this.postForm.invalid) {
