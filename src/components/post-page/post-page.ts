@@ -147,9 +147,10 @@ export class PostPage implements OnInit {
           this.snackBar.open('Comment edited!', 'Close', { duration: 2000 });
         },
         error: () => {
-          this.snackBar.open('Failed to edit comment!', 'Close', { duration: 2000 });
+          this.snackBar.open('Failed to edit comment! because there is no backend for this', 'Close', { duration: 2000 });
         }
       });
+      this.postService.updateCommentInCache(this.post?.id || 0, editedComment); // this updates cachedComments AND selectedPost$
     });
   }
 }
