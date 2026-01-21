@@ -13,6 +13,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormField, MatLabel } from '@angular/material/select';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard } from '@angular/material/card';
 
 @Component({
   selector: 'app-post-list',
@@ -24,6 +27,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
     MatProgressSpinnerModule,
     MatSort,
     MatSortModule,
+    MatLabel,
+    MatCard,
   ],
   templateUrl: './post-list.html',
   styleUrl: './post-list.css',

@@ -1,48 +1,88 @@
-<div class="post-container">
-  <div *ngIf="postLoading" class="loading-text">
-    <p>Loading post...</p>
-  </div>
+<div class="page">
 
-  <div *ngIf="!postLoading && post">
-    <!-- TOP ROW: Post title + Edit button -->
-    <div class="post-header">
-      <h1 class="post-title">Post Title: {{ post.title }}</h1>
-      <button class="edit-post-btn" (click)="editPost()">Edit post</button>
-    </div>
+  <ng-container *ngIf="!postLoading && post">
 
-    <p class="post-body">Post body: {{ post.body }}</p>
+    <!-- POST -->
+    <mat-card class="post-card">
 
-    <div class="comments-section">
-      <ng-container *ngIf="commentsLoading">
-        <p class="loading-text">Loading comments...</p>
-      </ng-container>
+      <mat-card-header>
+        <mat-card-title class="post-title">
+          {{ post.title }}
+        </mat-card-title>
 
-      <ng-container *ngIf="!commentsLoading && comments && comments.length > 0">
-        <h2 class="comments-title">Comments</h2>
-        <ul class="comment-list">
-          <li *ngFor="let comment of comments" class="comment-item">
-            <div class="comment-author">{{ comment.name }}</div>
-            <div class="comment-email">{{ comment.email }}</div>    
-            <div class="comment-body">{{ comment.body }}</div>
-            <button class="edit-comment-btn" (click)="openEditCommentDialog(comment)">Edit</button>
-          </li>
-        </ul>
+        <mat-card-subtitle class="post-subtitle">
+          Post content
+        </mat-card-subtitle>
+      </mat-card-header>
 
-        <!-- Bottom-right edit button -->
-        <div class="bottom-edit-btn">
-          <button class="add-comment-btn" (click)="openAddCommentDialog()" >Add comment</button>
-          <button class="edit-post-btn" (click)="editPost()">Edit post</button>
+      <mat-divider></mat-divider>
+
+      <mat-card-content>
+        <div class="post-text">
+          {{ post.body }}
         </div>
+      </mat-card-content>
 
-      </ng-container>
+      <mat-card-actions align="end">
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="editPost()">
+          Edit post
+        </button>
+      </mat-card-actions>
 
-      <ng-container *ngIf="!commentsLoading && comments && comments.length === 0">
-        <p class="no-comments">No comments available.</p>
-      </ng-container>
+    </mat-card>
+
+    <!-- COMMENTS -->
+    <mat-card class="comments-card">
+
+      <mat-card-header>
+        <mat-card-title>Comments</mat-card-title>
+        <mat-card-subtitle>
+          {{ comments.length || 0 }} total
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-divider></mat-divider>
+
+<mat-list *ngIf="comments.length">
+
+  <mat-list-item *ngFor="let comment of comments" class="comment-item">
+
+    <!-- Wrap content in a div so it can expand -->
+    <div class="comment-content">
+
+      <div class="comment-author">{{ comment.name }}</div>
+      <div class="comment-email">{{ comment.email }}</div>
+      <div class="comment-body">{{ comment.body }}</div>
+
     </div>
-  </div>
 
-  <div *ngIf="!postLoading && !post" class="no-comments">
-    <p>No post selected.</p>
-  </div>
+    <!-- Edit button on the right -->
+    <button
+      mat-icon-button
+      matListItemMeta
+      color="primary"
+      (click)="openEditCommentDialog(comment)">
+      Edit comment
+    </button>
+
+  </mat-list-item>
+
+</mat-list>
+
+      <mat-card-actions align="end">
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="openAddCommentDialog()">
+          Add comment
+        </button>
+      </mat-card-actions>
+
+    </mat-card>
+
+  </ng-container>
+
 </div>
