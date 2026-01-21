@@ -5,8 +5,9 @@ import { PostService } from '../../services/post-service';
 import { Post } from '../../models/post';
 import { Comment } from '../../models/comment';
 import { MatDialog } from '@angular/material/dialog';
-import { EditPostDialog } from '../edit-post-dialog/edit-post-dialog';
+import { EditPostDialog } from '../dialog/edit-post-dialog/edit-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AddCommentDialog } from '../dialog/add-comment-dialog/add-comment-dialog';
 
 @Component({
   selector: 'app-post-page',
@@ -16,7 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class PostPage implements OnInit {
   post: Post | null = null;
-  comments: Comment[] | null = null;
+  comments: Comment[] = [];
   commentsLoading: boolean = false;
   postLoading: boolean = false;
 
@@ -30,35 +31,44 @@ export class PostPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Subscribe to selected post
-    this.postService.selectedPost$.subscribe(post => {
-      this.post = post;
-      this.cdr.detectChanges(); // force Angular to update the template
-    });
-
-    // Also subscribe to route params to fetch a new post if needed
     this.route.params.subscribe(params => {
       const id = +params['id'];
       if (!id) return;
 
-      // Check if current selected post matches id
-      if (!this.post || this.post.id !== id) {
-        this.postLoading = true;
-        this.postService.getPostById(id).subscribe(post => {
-          this.postService.setSelectedPost(post); // automatically updates subscription
+      this.postLoading = true;
+      this.commentsLoading = true;
+      this.post = null;
+      this.comments = [];
+
+      this.postService.getPostById(id).subscribe({
+        next: post => {
+          this.post = post;
+          this.postService.setSelectedPost(post);
           this.postLoading = false;
-          this.loadComments(post.id);
-        });
-      } else if (!this.comments) {
-        this.loadComments(id);
-      }
+
+          // Subscribe to comments BehaviorSubject for this post
+          this.postService.getComments$(post.id).subscribe(comments => {
+            this.comments = comments;
+            this.commentsLoading = false;
+            this.cdr.detectChanges();
+          });
+
+          // Trigger fetch if needed
+          this.postService.loadComments(post.id);
+        },
+        error: () => {
+          this.postLoading = false;
+          this.post = null;
+          this.commentsLoading = false;
+        }
+      });
     });
   }
 
 
   private loadComments(postId: number) {
     this.commentsLoading = true;
-    this.postService.getPostComments(postId).subscribe({
+    this.postService.getComments$(postId).subscribe({
       next: (comments) => {
         console.log('Comments received for post', postId, ':', comments);
         this.comments = comments;
@@ -99,7 +109,25 @@ export class PostPage implements OnInit {
     });
   }
 
-  public editPostFromTable(post: Post) {
-    this.post = this.postService.getSelectedPost();
+  public openAddCommentDialog(): void {
+    const dialogRef = this.dialog.open(AddCommentDialog, {
+      width: '400px',
+      data: this.post,
+    });
+    dialogRef.afterClosed().subscribe((newComment: Comment | null) => {
+      if (!newComment) {
+        this.snackBar.open('Comment adding cancelled!', 'Close', { duration: 2000 });
+        return;
+      }
+          this.postService.addCommentToPost(this.post?.id || 0, newComment).subscribe({
+            next: (addedComment) => {
+              this.postService.addCommentToCache(this.post?.id || 0,addedComment);
+              this.snackBar.open('Comment added!', 'Close', { duration: 2000 });
+            },
+            error: () => {
+              this.snackBar.open('Failed to add comment!', 'Close', { duration: 2000 });
+            }
+          }); 
+        });
+      }
   }
-}

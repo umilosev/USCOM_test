@@ -10,15 +10,13 @@ import {
   MatDialogContent,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { Post } from '../../models/post';
+import { Comment } from '../../../models/comment';
+import { Post } from '../../../models/post';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-
-
 @Component({
-  selector: 'app-add-post-dialog',
-  standalone: true,
+  selector: 'app-add-comment-dialog',
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -29,20 +27,19 @@ import { CommonModule } from '@angular/common';
     ReactiveFormsModule,
     CommonModule
   ],
-  templateUrl: './add-post-dialog.html',
-  styleUrl: './add-post-dialog.css',
+  templateUrl: './add-comment-dialog.html',
+  styleUrl: './add-comment-dialog.css',
 })
-export class AddPostDialog {
-  
-  private dialogRef = inject(MatDialogRef<AddPostDialog>);
-  private data = inject<Post | null>(MAT_DIALOG_DATA);
+export class AddCommentDialog {
+  private dialogRef = inject(MatDialogRef<AddCommentDialog>);
+  private post = inject<Post | null>(MAT_DIALOG_DATA);
 
-  postForm = new FormGroup({
+  commentForm = new FormGroup({
     email: new FormControl<string>('',{
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
-    title: new FormControl<string>('',{
+    name: new FormControl<string>('',{
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(5)],
     }),
@@ -53,18 +50,18 @@ export class AddPostDialog {
   });
 
   save(): void {
-    if (this.postForm.invalid) {
-      this.postForm.markAllAsTouched();
+    if (this.commentForm.invalid) {
+      this.commentForm.markAllAsTouched();
       return;
     }
 
-    const post: Post = {
-      userId: this.data?.userId ?? 2,
-      id: this.data?.id ?? 101,
-      ...this.postForm.getRawValue(),
+    const comment: Comment = {
+      postId: this.post?.id ?? 2,
+      id: 501,
+      ...this.commentForm.getRawValue(),
     };
 
-    this.dialogRef.close(post);
+    this.dialogRef.close(comment);
   }
   cancel(): void {
     this.dialogRef.close(null);
