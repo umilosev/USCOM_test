@@ -12,6 +12,7 @@ import { DeletePostDialog } from '../dialog/delete-post-dialog/delete-post-dialo
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-post-list',
@@ -21,6 +22,8 @@ import { debounceTime } from 'rxjs/operators';
     MatTableModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatSort,
+    MatSortModule,
   ],
   templateUrl: './post-list.html',
   styleUrl: './post-list.css',
@@ -33,6 +36,8 @@ export class PostList implements OnInit {
   searchQuery: string = '';
   private searchSubject = new Subject<string>();
 
+  @ViewChild(MatSort) sort!: MatSort;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
@@ -44,6 +49,7 @@ export class PostList implements OnInit {
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnInit() {
@@ -150,4 +156,5 @@ export class PostList implements OnInit {
   this.postService.cachedPostsSubject.next(this.postService.cachedPostsSubject.value.filter(p => p.id !== postId));
   }
   
+
 }
