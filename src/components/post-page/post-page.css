@@ -65,3 +65,30 @@
   color: #777;
   margin: 20px 0;
 }
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.edit-post-btn {
+  background-color: #4CAF50; /* green */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.edit-post-btn:hover {
+  background-color: #45a049; /* darker green on hover */
+}
+
+.bottom-edit-btn {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

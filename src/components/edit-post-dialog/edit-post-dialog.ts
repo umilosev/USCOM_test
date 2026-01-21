@@ -15,11 +15,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 
-
 @Component({
-  selector: 'app-add-post-dialog',
-  standalone: true,
-  imports: [
+  selector: 'app-edit-post-dialog',
+  imports: [    
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -27,15 +25,13 @@ import { CommonModule } from '@angular/common';
     MatDialogContent,
     MatDialogActions,
     ReactiveFormsModule,
-    CommonModule
-  ],
-  templateUrl: './add-post-dialog.html',
-  styleUrl: './add-post-dialog.css',
+    CommonModule],
+  templateUrl: './edit-post-dialog.html',
+  styleUrl: './edit-post-dialog.css',
 })
-export class AddPostDialog {
-  
-  private dialogRef = inject(MatDialogRef<AddPostDialog>);
-  private data = inject<Post | null>(MAT_DIALOG_DATA);
+export class EditPostDialog {
+  private dialogRef = inject(MatDialogRef<EditPostDialog>);
+  public data = inject<Post | null>(MAT_DIALOG_DATA);
 
   postForm = new FormGroup({
     email: new FormControl<string>('',{
@@ -51,6 +47,16 @@ export class AddPostDialog {
       validators: [Validators.required, Validators.minLength(10)],  
     }),
   });
+
+  constructor() {
+    if (this.data) {
+      this.postForm.patchValue({
+        title: this.data.title,
+        body: this.data.body,
+        email: this.data.email,
+      });
+    }
+  }
 
   save(): void {
     if (this.postForm.invalid) {
@@ -70,3 +76,4 @@ export class AddPostDialog {
     this.dialogRef.close(null);
   }
 }
+
