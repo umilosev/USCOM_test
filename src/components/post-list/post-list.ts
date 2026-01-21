@@ -79,8 +79,7 @@ export class PostList implements OnInit {
       const lowerQuery = query.toLowerCase();
       this.dataSource.data = posts.filter(post =>
         post.title.toLowerCase().includes(lowerQuery) ||
-        post.body.toLowerCase().includes(lowerQuery) ||
-        post.email.toLowerCase().includes(lowerQuery)
+        post.body.toLowerCase().includes(lowerQuery)
       );
     }
 
