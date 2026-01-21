@@ -5,7 +5,7 @@ import { PostService } from '../../services/post-service';
 import { Post } from '../../models/post';
 import { Comment } from '../../models/comment';
 import { MatDialog } from '@angular/material/dialog';
-import { EditPostDialog } from '../edit-post-dialog/edit-post-dialog';
+import { EditPostDialog } from '../dialog/edit-post-dialog/edit-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({

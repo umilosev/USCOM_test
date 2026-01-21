@@ -10,7 +10,7 @@ import {
   MatDialogContent,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { Post } from '../../models/post';
+import { Post } from '../../../models/post';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 

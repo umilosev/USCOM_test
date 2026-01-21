@@ -7,8 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { PostService } from '../../services/post-service';
 import { Post } from '../../models/post';
-import { AddPostDialog } from '../add-post-dialog/add-post-dialog';
-import { DeletePostDialog } from '../delete-post-dialog/delete-post-dialog';
+import { AddPostDialog } from '../dialog/add-post-dialog/add-post-dialog';
+import { DeletePostDialog } from '../dialog/delete-post-dialog/delete-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
