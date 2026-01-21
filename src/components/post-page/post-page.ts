@@ -9,10 +9,27 @@ import { EditPostDialog } from '../dialog/edit-post-dialog/edit-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AddCommentDialog } from '../dialog/add-comment-dialog/add-comment-dialog';
 import { EditCommentDialog } from '../dialog/edit-comment-dialog/edit-comment-dialog';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { MatList, MatListItem } from '@angular/material/list';
 
 @Component({
   selector: 'app-post-page',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatProgressSpinner,
+    MatCard,
+    MatDivider,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatCardActions,
+    MatList,
+    MatListItem,
+  ],
   templateUrl: './post-page.html',
   styleUrl: './post-page.css',
 })
@@ -66,28 +83,9 @@ export class PostPage implements OnInit {
     });
   }
 
-
-  private loadComments(postId: number) {
-    this.commentsLoading = true;
-    this.postService.getComments$(postId).subscribe({
-      next: (comments) => {
-        console.log('Comments received for post', postId, ':', comments);
-        this.comments = comments;
-        this.commentsLoading = false;
-        console.log('Comments loaded, loading set to false');
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error loading comments:', err);
-        this.commentsLoading = false;
-        this.comments = [];
-      }
-    });
-  }
-
   public editPost(): void {
     const dialogRef = this.dialog.open(EditPostDialog, {
-      width: '400px',
+      width: '1700px',
       data: this.post,
     });
 
