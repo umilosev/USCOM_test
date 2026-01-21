@@ -99,21 +99,21 @@ export class PostList implements OnInit {
 
     dialogRef.afterClosed().subscribe((post: Post | null) => {
       if (post) {
+        console.log(`New post id: ${post.id}`);
         // Call the service to actually add the post
         this.postService.addPost(post).subscribe({
           next: (newPost) => {
             this.postService.cachedPostsSubject.next([
               ...this.postService.cachedPostsSubject.value,
-              newPost
+              //We are using post insted of newPost since the response from API doesn't give us the proper ID
+              //Since we are using JSONPlaceholder API, which doesn't actually create a new response
+              post
             ]);
-
     this.snackBar.open('Post added successfully!', 'Close', { duration: 2000 });
-  },
-  error: () => {
-    this.snackBar.open('Failed to add post!', 'Close', { duration: 2000 });
-  }
-});
-
+    }, error: () => {
+        this.snackBar.open('Failed to add post!', 'Close', { duration: 2000 });
+      }
+    });
       } else {
         // User cancelled
         this.snackBar.open('Add post cancelled.', 'Close', { duration: 2000 });
