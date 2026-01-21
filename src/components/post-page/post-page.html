@@ -29,8 +29,10 @@
 
         <!-- Bottom-right edit button -->
         <div class="bottom-edit-btn">
+          <button class="add-comment-btn" (click)="openAddCommentDialog()" >Add comment</button>
           <button class="edit-post-btn" (click)="editPost()">Edit post</button>
         </div>
+
       </ng-container>
 
       <ng-container *ngIf="!commentsLoading && comments && comments.length === 0">
