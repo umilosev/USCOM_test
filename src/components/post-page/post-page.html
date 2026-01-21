@@ -24,6 +24,7 @@
             <div class="comment-author">{{ comment.name }}</div>
             <div class="comment-email">{{ comment.email }}</div>    
             <div class="comment-body">{{ comment.body }}</div>
+            <button class="edit-comment-btn" (click)="openEditCommentDialog(comment)">Edit</button>
           </li>
         </ul>
 

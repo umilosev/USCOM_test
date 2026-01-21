@@ -219,7 +219,7 @@
     }
 
     editComment(comment: Comment): Observable<Comment> {
-      const url = '${this.apiPostsUrl}/comments/${comment.id}';
+      const url = `${this.apiPostsUrl}/comments/${comment.id}`;
       return from(
         fetch(url, {
           method:'PUT',

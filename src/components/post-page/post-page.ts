@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditPostDialog } from '../dialog/edit-post-dialog/edit-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AddCommentDialog } from '../dialog/add-comment-dialog/add-comment-dialog';
+import { EditCommentDialog } from '../dialog/edit-comment-dialog/edit-comment-dialog';
 
 @Component({
   selector: 'app-post-page',
@@ -130,4 +131,25 @@ export class PostPage implements OnInit {
           }); 
         });
       }
+  public openEditCommentDialog(comment : Comment): void{
+    const dialogRef = this.dialog.open(EditCommentDialog, {
+      width: '400px',
+      data: comment,
+    });
+    dialogRef.afterClosed().subscribe((editedComment: Comment | null) => {
+      if (!editedComment) {
+        this.snackBar.open('Comment editing cancelled!', 'Close', { duration: 2000 });
+        return;
+      }
+      this.postService.editComment(editedComment).subscribe({
+        next: (editedComment) => {
+          this.postService.updateCommentInCache(this.post?.id || 0, editedComment); // this updates cachedComments AND selectedPost$
+          this.snackBar.open('Comment edited!', 'Close', { duration: 2000 });
+        },
+        error: () => {
+          this.snackBar.open('Failed to edit comment!', 'Close', { duration: 2000 });
+        }
+      });
+    });
   }
+}
