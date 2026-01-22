@@ -46,6 +46,7 @@ export class PostPage implements OnInit {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
   ) {}
+
   //
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -93,8 +94,9 @@ export class PostPage implements OnInit {
         this.snackBar.open('Post editing cancelled!', 'Close', { duration: 2000 });
         return;
       }
-
       this.postService.editPost(editedPost).subscribe({
+        //we use the response in savedPost to update the cache
+        //because we trust the backend to return the updated post
         next: (savedPost) => {
           // Update the service cache
           this.postService.updatePostInCache(savedPost); // this updates cachedPosts AND selectedPost$
@@ -117,17 +119,19 @@ export class PostPage implements OnInit {
         this.snackBar.open('Comment adding cancelled!', 'Close', { duration: 2000 });
         return;
       }
-          this.postService.addCommentToPost(this.post?.id || 0, newComment).subscribe({
-            next: (addedComment) => {
-              this.postService.addCommentToCache(this.post?.id || 0,addedComment);
-              this.snackBar.open('Comment added!', 'Close', { duration: 2000 });
-            },
-            error: () => {
-              this.snackBar.open('Failed to add comment!', 'Close', { duration: 2000 });
-            }
-          }); 
-        });
-      }
+        this.postService.addCommentToPost(this.post?.id || 0, newComment).subscribe({
+          //it's the same as newPost in AddPostDialog since the API doesn't return the created comment with the ID
+          next: (addedComment) => {
+            this.postService.addCommentToCache(this.post?.id || 0,newComment);
+            this.snackBar.open('Comment added!', 'Close', { duration: 2000 });
+          },
+          error: () => {
+            this.snackBar.open('Failed to add comment!', 'Close', { duration: 2000 });
+          }
+        }); 
+    });
+  }
+
   public openEditCommentDialog(comment : Comment): void{
     const dialogRef = this.dialog.open(EditCommentDialog, {
       width: '400px',

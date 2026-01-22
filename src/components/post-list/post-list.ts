@@ -69,9 +69,8 @@ export class PostList implements OnInit {
     // Trigger initial load
     this.postService.getPosts().subscribe();
 
-    // Handle search with debounce
     this.searchSubject.pipe(
-      debounceTime(300) // wait 300ms after the last keystroke
+      debounceTime(300) 
     ).subscribe(query => {
       this.searchQuery = query;
       const posts = this.postService.cachedPostsSubject.value;
@@ -85,10 +84,11 @@ export class PostList implements OnInit {
 
   private applyFilter(query: string, posts: Post[]) {
     if (!query) {
-      this.dataSource.data = [...posts]; // create a new array reference
+      this.dataSource.data = [...posts];
     } else {
       const lowerQuery = query.toLowerCase();
       this.dataSource.data = posts.filter(post =>
+        //only searches through the title and body for matching text
         post.title.toLowerCase().includes(lowerQuery) ||
         post.body.toLowerCase().includes(lowerQuery)
       );
@@ -104,7 +104,7 @@ export class PostList implements OnInit {
 
   openAddPostDialog(): void {
     const dialogRef = this.dialog.open(AddPostDialog, {
-      width: '600px', // smaller width is usually fine
+      width: '600px', 
     });
 
     dialogRef.afterClosed().subscribe((post: Post | null) => {
@@ -148,11 +148,11 @@ export class PostList implements OnInit {
         this.snackBar.open('Post deleted!', 'Close', {});
       } else {
           this.snackBar.open('Post deletion cancelled!', 'Close', {});
-
       }
     });
   }
 
+  //This method removes the post from the table after deletion
   removePostFromTable(postId: number) {
   // Update the dataSource.data array
   this.dataSource.data = this.dataSource.data.filter(p => p.id !== postId);
@@ -160,6 +160,4 @@ export class PostList implements OnInit {
   // Optional: also update cachedPosts in your service
   this.postService.cachedPostsSubject.next(this.postService.cachedPostsSubject.value.filter(p => p.id !== postId));
   }
-  
-
 }

@@ -49,6 +49,7 @@ export class AddCommentDialog {
     }),
   });
 
+  //only returns the comment that was edited
   save(): void {
     if (this.commentForm.invalid) {
       this.commentForm.markAllAsTouched();
@@ -63,6 +64,7 @@ export class AddCommentDialog {
 
     this.dialogRef.close(comment);
   }
+
   cancel(): void {
     this.dialogRef.close(null);
   }
