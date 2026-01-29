@@ -9,10 +9,26 @@ import { EditPostDialog } from '../dialog/edit-post-dialog/edit-post-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AddCommentDialog } from '../dialog/add-comment-dialog/add-comment-dialog';
 import { EditCommentDialog } from '../dialog/edit-comment-dialog/edit-comment-dialog';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { MatList, MatListItem } from '@angular/material/list';
 
 @Component({
   selector: 'app-post-page',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatCard,
+    MatDivider,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatCardActions,
+    MatList,
+    MatListItem,
+  ],
   templateUrl: './post-page.html',
   styleUrl: './post-page.css',
 })
@@ -31,6 +47,7 @@ export class PostPage implements OnInit {
     private snackBar: MatSnackBar,
   ) {}
 
+  //
   ngOnInit() {
     this.route.params.subscribe(params => {
       const id = +params['id'];
@@ -66,28 +83,9 @@ export class PostPage implements OnInit {
     });
   }
 
-
-  private loadComments(postId: number) {
-    this.commentsLoading = true;
-    this.postService.getComments$(postId).subscribe({
-      next: (comments) => {
-        console.log('Comments received for post', postId, ':', comments);
-        this.comments = comments;
-        this.commentsLoading = false;
-        console.log('Comments loaded, loading set to false');
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error loading comments:', err);
-        this.commentsLoading = false;
-        this.comments = [];
-      }
-    });
-  }
-
   public editPost(): void {
     const dialogRef = this.dialog.open(EditPostDialog, {
-      width: '400px',
+      width: '1700px',
       data: this.post,
     });
 
@@ -96,8 +94,9 @@ export class PostPage implements OnInit {
         this.snackBar.open('Post editing cancelled!', 'Close', { duration: 2000 });
         return;
       }
-
       this.postService.editPost(editedPost).subscribe({
+        //we use the response in savedPost to update the cache
+        //because we trust the backend to return the updated post
         next: (savedPost) => {
           // Update the service cache
           this.postService.updatePostInCache(savedPost); // this updates cachedPosts AND selectedPost$
@@ -120,17 +119,19 @@ export class PostPage implements OnInit {
         this.snackBar.open('Comment adding cancelled!', 'Close', { duration: 2000 });
         return;
       }
-          this.postService.addCommentToPost(this.post?.id || 0, newComment).subscribe({
-            next: (addedComment) => {
-              this.postService.addCommentToCache(this.post?.id || 0,addedComment);
-              this.snackBar.open('Comment added!', 'Close', { duration: 2000 });
-            },
-            error: () => {
-              this.snackBar.open('Failed to add comment!', 'Close', { duration: 2000 });
-            }
-          }); 
-        });
-      }
+        this.postService.addCommentToPost(this.post?.id || 0, newComment).subscribe({
+          //it's the same as newPost in AddPostDialog since the API doesn't return the created comment with the ID
+          next: (addedComment) => {
+            this.postService.addCommentToCache(this.post?.id || 0,newComment);
+            this.snackBar.open('Comment added!', 'Close', { duration: 2000 });
+          },
+          error: () => {
+            this.snackBar.open('Failed to add comment!', 'Close', { duration: 2000 });
+          }
+        }); 
+    });
+  }
+
   public openEditCommentDialog(comment : Comment): void{
     const dialogRef = this.dialog.open(EditCommentDialog, {
       width: '400px',

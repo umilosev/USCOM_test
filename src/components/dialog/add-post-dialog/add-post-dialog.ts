@@ -54,7 +54,7 @@ export class AddPostDialog {
       validators: [Validators.required, Validators.minLength(10)],  
     }),
   });
-
+  //only returns the post that was entered with a special ID, since our backend doesn't work
   save(): void {
     if (this.postForm.invalid) {
       this.postForm.markAllAsTouched();
